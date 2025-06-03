@@ -15,6 +15,8 @@ async fn main() {
     let screen_center_y = screen_height() / 2.0;
     rand::srand(miniquad::date::now() as u64);
 
+    let enemy_colors = [GRAY, BEIGE, PINK, RED];
+
     let mut enemy_vector: EnemyVector = EnemyVector::new();
 
     let mut circle = Shape {
@@ -22,6 +24,7 @@ async fn main() {
         speed: MOVEMENT_SPEED,
         x: screen_center_x,
         y: screen_center_y,
+        color: YELLOW,
     };
 
     loop {
@@ -35,7 +38,9 @@ async fn main() {
 
         if rand::gen_range(0, 99) >= 95 {
             let size = rand::gen_range(16.0, 64.0);
-            enemy_vector.spawn_enemy(size);
+            let color = rand::gen_range(0, enemy_colors.len());
+
+            enemy_vector.spawn_enemy(size, enemy_colors[color]);
         }
 
         // move squares down the screen
@@ -61,7 +66,7 @@ async fn main() {
 
         // DRAW
 
-        draw_circle(circle.x, circle.y, circle.size, YELLOW);
+        draw_circle(circle.x, circle.y, circle.size, circle.color);
 
         enemy_vector.draw_enemies();
 

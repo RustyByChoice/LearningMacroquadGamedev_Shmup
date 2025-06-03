@@ -12,12 +12,13 @@ impl EnemyVector {
         return EnemyVector { enemies };
     }
 
-    pub fn spawn_enemy(&mut self, size :f32) {
+    pub fn spawn_enemy(&mut self, size :f32, color :Color) {
         self.enemies.push(Shape {
            size,
            speed: rand::gen_range(50.0, 150.0),
            x: rand::gen_range(size / 2.0, screen_width() - size / 2.0),
            y: -size,
+           color: color,
         });
     }
 
@@ -38,7 +39,7 @@ impl EnemyVector {
                 enemy.y - enemy.size / 2.0,
                 enemy.size,
                 enemy.size,
-                GREEN,
+                enemy.color,
             );
         }
     }
