@@ -15,12 +15,6 @@ async fn main() {
     let screen_center_y = screen_height() / 2.0;
     rand::srand(miniquad::date::now() as u64);
 
-    //let mut x = screen_center_x;
-    //let mut y = screen_center_y;
-    //let radius = 16.0;
-
-    //let mut speed;
-
     let mut enemy_vector: EnemyVector = EnemyVector::new();
 
     let mut circle = Shape {
@@ -39,7 +33,10 @@ async fn main() {
 
         circle.speed = MOVEMENT_SPEED * delta_time;
 
-        enemy_vector.spawn_enemies();
+        if rand::gen_range(0, 99) >= 95 {
+            let size = rand::gen_range(16.0, 64.0);
+            enemy_vector.spawn_enemy(size);
+        }
 
         // move squares down the screen
         enemy_vector.move_enemies(delta_time);

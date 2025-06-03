@@ -12,16 +12,13 @@ impl EnemyVector {
         return EnemyVector { enemies };
     }
 
-    pub fn spawn_enemies(&mut self) {
-        if rand::gen_range(0, 99) >= 95 {
-            let size = rand::gen_range(16.0, 64.0);
-            self.enemies.push(Shape {
-               size,
-               speed: rand::gen_range(50.0, 150.0),
-               x: rand::gen_range(size / 2.0, screen_width() - size / 2.0),
-               y: -size,
-            });
-        }
+    pub fn spawn_enemy(&mut self, size :f32) {
+        self.enemies.push(Shape {
+           size,
+           speed: rand::gen_range(50.0, 150.0),
+           x: rand::gen_range(size / 2.0, screen_width() - size / 2.0),
+           y: -size,
+        });
     }
 
     pub fn hide_enemies(&mut self) {
