@@ -88,7 +88,7 @@ async fn main() {
                 draw_text(
                     text,
                     screen_center_x - text_dimensions.width / 2.0,
-                    screen_center_y / 2.0,
+                    screen_center_y - text_dimensions.height / 2.0,
                     50.0,
                     RED,
                 );
