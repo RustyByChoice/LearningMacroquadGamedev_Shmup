@@ -43,4 +43,12 @@ impl EnemyVector {
             );
         }
     }
+
+    pub fn collides_with(&mut self, circle :&Shape) -> bool {
+        self.enemies.iter().any(|e| circle.collides_with(&e))
+    }
+
+    pub fn clear(&mut self) {
+        self.enemies.clear();
+    }
 }

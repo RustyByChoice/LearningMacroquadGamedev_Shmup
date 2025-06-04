@@ -15,6 +15,7 @@ async fn main() {
     let screen_center_y = screen_height() / 2.0;
     rand::srand(miniquad::date::now() as u64);
 
+    let mut is_gameover = false;
     let enemy_colors = [GRAY, BEIGE, PINK, RED];
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
@@ -31,44 +32,68 @@ async fn main() {
         // UPDATE
         clear_background(DARKPURPLE);
 
-        // time that passed since the last frame
-        let delta_time = get_frame_time();
+        if !is_gameover {
+            // time that passed since the last frame
+            let delta_time = get_frame_time();
 
-        circle.speed = MOVEMENT_SPEED * delta_time;
+            circle.speed = MOVEMENT_SPEED * delta_time;
 
-        if rand::gen_range(0, 99) >= 95 {
-            let size = rand::gen_range(16.0, 64.0);
-            let color = rand::gen_range(0, enemy_colors.len());
+            if rand::gen_range(0, 99) >= 95 {
+                let size = rand::gen_range(16.0, 64.0);
+                let color = rand::gen_range(0, enemy_colors.len());
 
-            enemy_vector.spawn_enemy(size, enemy_colors[color]);
+                enemy_vector.spawn_enemy(size, enemy_colors[color]);
+            }
+
+            // move squares down the screen
+            enemy_vector.move_enemies(delta_time);
+            enemy_vector.hide_enemies();
+
+            if is_key_down(KeyCode::Right) {
+                circle.x += circle.speed;
+            }
+            if is_key_down(KeyCode::Left) {
+                circle.x -= circle.speed;
+            }
+            if is_key_down(KeyCode::Down) {
+                circle.y += circle.speed;
+            }
+            if is_key_down(KeyCode::Up) {
+                circle.y -= circle.speed;
+            }
+
+            // clamp is used to clamp a value between a min and max value
+            circle.x = clamp(circle.x, 0.0 + circle.size, screen_width() - circle.size);
+            circle.y = clamp(circle.y, 0.0 + circle.size, screen_height() - circle.size);
+
+            // COLLISION DETECTION
+            if enemy_vector.collides_with(&circle) {
+                is_gameover = true;
+            }
+            // DRAW
+
+            draw_circle(circle.x, circle.y, circle.size, circle.color);
+
+            enemy_vector.draw_enemies();
+        } else {
+            if is_key_pressed(KeyCode::Space) {
+                enemy_vector.clear();
+                circle.x = screen_center_x;
+                circle.y = screen_center_y;
+                is_gameover = false;
+            }
+            else {
+                let text = "GAME OVER!";
+                let text_dimensions = measure_text(text, None, 50, 1.0);
+                draw_text(
+                    text,
+                    screen_center_x - text_dimensions.width / 2.0,
+                    screen_center_y / 2.0,
+                    50.0,
+                    RED,
+                );
+            }
         }
-
-        // move squares down the screen
-        enemy_vector.move_enemies(delta_time);
-        enemy_vector.hide_enemies();
-
-        if is_key_down(KeyCode::Right) {
-            circle.x += circle.speed;
-        }
-        if is_key_down(KeyCode::Left) {
-            circle.x -= circle.speed;
-        }
-        if is_key_down(KeyCode::Down) {
-            circle.y += circle.speed;
-        }
-        if is_key_down(KeyCode::Up) {
-            circle.y -= circle.speed;
-        }
-
-        // clamp is used to clamp a value between a min and max value
-        circle.x = clamp(circle.x, 0.0 + circle.size, screen_width() - circle.size);
-        circle.y = clamp(circle.y, 0.0 + circle.size, screen_height() - circle.size);
-
-        // DRAW
-
-        draw_circle(circle.x, circle.y, circle.size, circle.color);
-
-        enemy_vector.draw_enemies();
 
         // waits until the next frame is available
         next_frame().await
