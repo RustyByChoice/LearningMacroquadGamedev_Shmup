@@ -3,7 +3,7 @@ use macroquad::prelude::*;
 mod shape;
 mod enemy_vector;
 
-use crate::shape::Shape;
+use crate::shape::HeroCircle;
 use crate::enemy_vector::EnemyVector;
 
 const MOVEMENT_SPEED: f32 = 200.0;
@@ -20,13 +20,7 @@ async fn main() {
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
 
-    let mut circle = Shape {
-        size: 32.0,
-        speed: MOVEMENT_SPEED,
-        x: screen_center_x,
-        y: screen_center_y,
-        color: YELLOW,
-    };
+    let mut circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
 
     loop {
         // UPDATE
@@ -36,7 +30,7 @@ async fn main() {
             // time that passed since the last frame
             let delta_time = get_frame_time();
 
-            circle.speed = MOVEMENT_SPEED * delta_time;
+            circle.shape.speed = MOVEMENT_SPEED * delta_time;
 
             if rand::gen_range(0, 99) >= 95 {
                 let size = rand::gen_range(16.0, 64.0);
@@ -50,21 +44,21 @@ async fn main() {
             enemy_vector.hide_enemies();
 
             if is_key_down(KeyCode::Right) {
-                circle.x += circle.speed;
+                circle.shape.x += circle.shape.speed;
             }
             if is_key_down(KeyCode::Left) {
-                circle.x -= circle.speed;
+                circle.shape.x -= circle.shape.speed;
             }
             if is_key_down(KeyCode::Down) {
-                circle.y += circle.speed;
+                circle.shape.y += circle.shape.speed;
             }
             if is_key_down(KeyCode::Up) {
-                circle.y -= circle.speed;
+                circle.shape.y -= circle.shape.speed;
             }
 
             // clamp is used to clamp a value between a min and max value
-            circle.x = clamp(circle.x, 0.0 + circle.size, screen_width() - circle.size);
-            circle.y = clamp(circle.y, 0.0 + circle.size, screen_height() - circle.size);
+            circle.shape.x = clamp(circle.shape.x, 0.0 + circle.shape.size, screen_width() - circle.shape.size);
+            circle.shape.y = clamp(circle.shape.y, 0.0 + circle.shape.size, screen_height() - circle.shape.size);
 
             // COLLISION DETECTION
             if enemy_vector.collides_with(&circle) {
@@ -72,14 +66,14 @@ async fn main() {
             }
             // DRAW
 
-            draw_circle(circle.x, circle.y, circle.size, circle.color);
+            draw_circle(circle.shape.x, circle.shape.y, circle.shape.size, circle.shape.color);
 
             enemy_vector.draw_enemies();
         } else {
             if is_key_pressed(KeyCode::Space) {
                 enemy_vector.clear();
-                circle.x = screen_center_x;
-                circle.y = screen_center_y;
+                circle.shape.x = screen_center_x;
+                circle.shape.y = screen_center_y;
                 is_gameover = false;
             }
             else {

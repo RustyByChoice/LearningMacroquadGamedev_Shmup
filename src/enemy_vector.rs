@@ -1,8 +1,9 @@
 use macroquad::prelude::*;
-use crate::Shape;
+use crate::HeroCircle;
+use crate::shape::EnemySquare;
 
 pub struct EnemyVector {
-    enemies: Vec<Shape>,
+    enemies: Vec<EnemySquare>,
 }
 
 impl EnemyVector {
@@ -13,38 +14,32 @@ impl EnemyVector {
     }
 
     pub fn spawn_enemy(&mut self, size :f32, color :Color) {
-        self.enemies.push(Shape {
-           size,
-           speed: rand::gen_range(50.0, 150.0),
-           x: rand::gen_range(size / 2.0, screen_width() - size / 2.0),
-           y: -size,
-           color: color,
-        });
+        self.enemies.push(EnemySquare::new(size, color));
     }
 
     pub fn hide_enemies(&mut self) {
-        self.enemies.retain(|enemy| enemy.y < screen_height() + enemy.size);
+        self.enemies.retain(|enemy| enemy.shape.y < screen_height() + enemy.shape.size);
     }
 
     pub fn move_enemies(&mut self, delta_time :f32) {
         for enemy in &mut self.enemies {
-            enemy.y += enemy.speed * delta_time;
+            enemy.shape.y += enemy.shape.speed * delta_time;
         }
     }
 
     pub fn draw_enemies(&mut self) {
         for enemy in &self.enemies {
             draw_rectangle(
-                enemy.x - enemy.size / 2.0,
-                enemy.y - enemy.size / 2.0,
-                enemy.size,
-                enemy.size,
-                enemy.color,
+                enemy.shape.x - enemy.shape.size / 2.0,
+                enemy.shape.y - enemy.shape.size / 2.0,
+                enemy.shape.size,
+                enemy.shape.size,
+                enemy.shape.color,
             );
         }
     }
 
-    pub fn collides_with(&mut self, circle :&Shape) -> bool {
+    pub fn collides_with(&mut self, circle :&HeroCircle) -> bool {
         self.enemies.iter().any(|e| circle.collides_with(&e))
     }
 
