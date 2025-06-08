@@ -1,6 +1,8 @@
+//mod enemy_square;
+
 use macroquad::prelude::*;
 use crate::HeroCircle;
-use crate::shape::EnemySquare;
+use crate::enemy_square::EnemySquare;
 
 pub struct EnemyVector {
     enemies: Vec<EnemySquare>,

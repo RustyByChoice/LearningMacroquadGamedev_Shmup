@@ -1,9 +1,10 @@
-use macroquad::prelude::*;
-
 mod shape;
+mod enemy_square;
 mod enemy_vector;
+mod hero_circle;
 
-use crate::shape::HeroCircle;
+use macroquad::prelude::*;
+use crate::hero_circle::HeroCircle;
 use crate::enemy_vector::EnemyVector;
 
 const MOVEMENT_SPEED: f32 = 200.0;
