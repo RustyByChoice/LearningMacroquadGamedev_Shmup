@@ -1,5 +1,3 @@
-//mod enemy_square;
-
 use macroquad::prelude::*;
 use crate::HeroCircle;
 use crate::enemy_square::EnemySquare;
