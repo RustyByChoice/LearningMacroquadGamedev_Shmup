@@ -8,8 +8,19 @@ pub struct Shape {
     pub color: Color,
 }
 
+impl Shape {
+    fn rect(&self) -> Rect {
+        Rect {
+            x: self.x - self.size / 2.0,
+            y: self.y - self.size / 2.0,
+            w: self.size,
+            h: self.size,
+        }
+    }
+}
+
 pub struct HeroCircle {
-    pub shape: Shape,
+    shape: Shape,
 }
 
 impl HeroCircle {
@@ -26,16 +37,51 @@ impl HeroCircle {
     }
 
     pub fn collides_with(&self, other: &EnemySquare) -> bool {
-        self.rect().overlaps(&other.shape.rect())
+        self.circle().overlaps_rect(&other.shape.rect())
     }
 
-    fn rect(&self) -> Rect {
-        Rect {
-            x: self.shape.x - self.shape.size / 2.0,
-            y: self.shape.y - self.shape.size / 2.0,
-            w: self.shape.size,
-            h: self.shape.size,
+    fn circle(&self) -> Circle {
+        Circle {
+            x: self.shape.x,
+            y: self.shape.y,
+            r: self.shape.size,
         }
+    }
+
+    pub fn move_up(&mut self) {
+        self.shape.y -= self.shape.speed;
+        self.clamp_y();
+    }
+
+    pub fn move_down(&mut self) {
+        self.shape.y += self.shape.speed;
+        self.clamp_y();
+    }
+
+    pub fn move_left(&mut self) {
+        self.shape.x -= self.shape.speed;
+        self.clamp_x();
+    }
+
+    pub fn move_right(&mut self) {
+        self.shape.x += self.shape.speed;
+        self.clamp_x();
+    }
+
+    fn clamp_x(&mut self) {
+        self.shape.x = clamp(self.shape.x, 0.0 + self.shape.size, screen_width() - self.shape.size);
+    }
+
+    fn clamp_y(&mut self) {
+        self.shape.y = clamp(self.shape.y, 0.0 + self.shape.size, screen_height() - self.shape.size);
+    }
+
+    pub fn draw(&self) {
+        draw_circle(self.shape.x, self.shape.y, self.shape.size, self.shape.color);
+    }
+
+    pub fn set_speed(&mut self, new_speed :f32) {
+        self.shape.speed = new_speed;
     }
 }
 
@@ -54,16 +100,5 @@ impl EnemySquare {
                color: color,
             },
         };
-    }
-}
-
-impl Shape {
-    fn rect(&self) -> Rect {
-        Rect {
-            x: self.x - self.size / 2.0,
-            y: self.y - self.size / 2.0,
-            w: self.size,
-            h: self.size,
-        }
     }
 }

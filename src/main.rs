@@ -19,7 +19,6 @@ async fn main() {
     let enemy_colors = [GRAY, BEIGE, PINK, RED];
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
-
     let mut circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
 
     loop {
@@ -30,7 +29,7 @@ async fn main() {
             // time that passed since the last frame
             let delta_time = get_frame_time();
 
-            circle.shape.speed = MOVEMENT_SPEED * delta_time;
+            circle.set_speed(MOVEMENT_SPEED * delta_time);
 
             if rand::gen_range(0, 99) >= 95 {
                 let size = rand::gen_range(16.0, 64.0);
@@ -44,36 +43,30 @@ async fn main() {
             enemy_vector.hide_enemies();
 
             if is_key_down(KeyCode::Right) {
-                circle.shape.x += circle.shape.speed;
+                circle.move_right();
             }
             if is_key_down(KeyCode::Left) {
-                circle.shape.x -= circle.shape.speed;
+                circle.move_left();
             }
             if is_key_down(KeyCode::Down) {
-                circle.shape.y += circle.shape.speed;
+                circle.move_down();
             }
             if is_key_down(KeyCode::Up) {
-                circle.shape.y -= circle.shape.speed;
+                circle.move_up();
             }
-
-            // clamp is used to clamp a value between a min and max value
-            circle.shape.x = clamp(circle.shape.x, 0.0 + circle.shape.size, screen_width() - circle.shape.size);
-            circle.shape.y = clamp(circle.shape.y, 0.0 + circle.shape.size, screen_height() - circle.shape.size);
 
             // COLLISION DETECTION
             if enemy_vector.collides_with(&circle) {
                 is_gameover = true;
             }
+
             // DRAW
-
-            draw_circle(circle.shape.x, circle.shape.y, circle.shape.size, circle.shape.color);
-
+            circle.draw();
             enemy_vector.draw_enemies();
         } else {
             if is_key_pressed(KeyCode::Space) {
                 enemy_vector.clear();
-                circle.shape.x = screen_center_x;
-                circle.shape.y = screen_center_y;
+                circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
                 is_gameover = false;
             }
             else {
