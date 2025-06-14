@@ -1,11 +1,12 @@
 mod shape;
 mod bullet;
+mod bullet_vector;
 mod enemy_square;
 mod enemy_vector;
 mod hero_circle;
 
 use macroquad::prelude::*;
-use crate::bullet::Bullet;
+use crate::bullet_vector::BulletVector;
 use crate::hero_circle::HeroCircle;
 use crate::enemy_vector::EnemyVector;
 
@@ -22,7 +23,7 @@ async fn main() {
     let enemy_colors = [GRAY, BEIGE, PINK, RED];
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
-    let mut bullets: Vec<Bullet> = vec![];
+    let mut bullet_vector: BulletVector = BulletVector::new();
     let mut circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
 
     loop {
@@ -42,18 +43,6 @@ async fn main() {
                 enemy_vector.spawn_enemy(size, enemy_colors[color]);
             }
 
-            // move bullets
-            for bullet in &mut bullets {
-                bullet.shape.y -= bullet.shape.speed * delta_time;
-            }
-            bullets.retain(|bullet| bullet.shape.y > 0.0 - bullet.shape.size / 2.0);
-
-            // move squares down the screen
-            enemy_vector.move_enemies(delta_time);
-            enemy_vector.hide_enemies();
-
-            bullets.retain(|bullet| !bullet.shape.collided);
-
             if is_key_down(KeyCode::Right) {
                 circle.move_right();
             }
@@ -67,22 +56,33 @@ async fn main() {
                 circle.move_up();
             }
             if is_key_pressed(KeyCode::Space) {
-                bullets.push(Bullet::new(&circle.shape.x, &circle.shape.y, &circle.shape.speed));
+                bullet_vector.fire(&circle.shape.x, &circle.shape.y);
             }
+
+            // move squares down the screen
+            enemy_vector.move_enemies(delta_time);
+            // move bullets
+            bullet_vector.move_bullets(delta_time);
+
 
             // COLLISION DETECTION
             if enemy_vector.collides_with(circle.clone()) {
                 is_gameover = true;
             }
 
-            enemy_vector.collides_with_bullets(&mut bullets);
+            enemy_vector.collides_with_bullets(&mut bullet_vector);
+
+            enemy_vector.hide_enemies();
+            bullet_vector.hide_bullets();
 
             // DRAW
-            circle.draw();
             enemy_vector.draw_enemies();
+            bullet_vector.draw_bullets();
+            circle.draw();
         } else {
             if is_key_pressed(KeyCode::Space) {
                 enemy_vector.clear();
+                bullet_vector.clear();                
                 circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
                 is_gameover = false;
             }

@@ -7,12 +7,12 @@ pub struct Bullet {
 }
 
 impl Bullet {
-    pub fn new(start_x : &f32, start_y : &f32, vessel_speed : &f32) -> Bullet {
+    pub fn new(start_x : f32, start_y : f32) -> Bullet {
         return Bullet {
             shape: Shape {
-                x: *start_x,
-                y: *start_y,
-                speed: *vessel_speed * 2.0,
+                x: start_x,
+                y: start_y,
+                speed: 50.0,
                 size: 5.0,
                 color: YELLOW,
                 collided: false,

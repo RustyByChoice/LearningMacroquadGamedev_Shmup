@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
+use crate::bullet_vector::BulletVector;
 use crate::HeroCircle;
-use crate::bullet::Bullet;
 use crate::enemy_square::{GameEntity,EnemySquare};
 
 pub struct EnemyVector {
@@ -42,12 +42,13 @@ impl EnemyVector {
     }
 
     pub fn collides_with(&mut self, circle : HeroCircle) -> bool {
-        // self.enemies.iter().any(|e| circle.collides_with(e.rect()))
-        self.enemies.iter_mut().any(|e| e.collides_with(GameEntity::Hero(circle.clone())))
+        self.enemies
+            .iter_mut()
+            .any(|e| e.collides_with(GameEntity::Hero(circle.clone())))
     }
 
-    pub fn collides_with_bullets(&mut self, bullets :&mut Vec<Bullet>) {
-        for bullet in bullets.iter_mut() {
+    pub fn collides_with_bullets(&mut self, bullets : &mut BulletVector) {
+        for bullet in bullets.bullets.iter_mut() {
             for enemy in self.enemies.iter_mut() {
                 if enemy.collides_with(GameEntity::Projectile(bullet.clone())) {
                     bullet.shape.collided = true;
