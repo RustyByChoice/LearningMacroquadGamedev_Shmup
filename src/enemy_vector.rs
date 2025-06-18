@@ -47,15 +47,18 @@ impl EnemyVector {
             .any(|e| e.collides_with(GameEntity::Hero(circle.clone())))
     }
 
-    pub fn collides_with_bullets(&mut self, bullets : &mut BulletVector) {
+    pub fn collides_with_bullets(&mut self, bullets : &mut BulletVector) -> bool {
         for bullet in bullets.bullets.iter_mut() {
             for enemy in self.enemies.iter_mut() {
                 if enemy.collides_with(GameEntity::Projectile(bullet.clone())) {
                     bullet.shape.collided = true;
                     enemy.shape.collided = true;
+                    return true;
                 }
             }
         }
+
+        false
     }
 
     pub fn clear(&mut self) {

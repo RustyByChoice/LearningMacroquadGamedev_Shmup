@@ -3,13 +3,14 @@ use macroquad::prelude::*;
 
 pub struct BulletVector {
     pub bullets: Vec<Bullet>,
+    pub last_time_fired : f64,
 }
 
 impl BulletVector {
     pub fn new() -> BulletVector {
         let bullets = vec![];
 
-        return BulletVector { bullets };
+        BulletVector { bullets: bullets, last_time_fired: 0. }
     }
 
     pub fn move_bullets(&mut self, delta_time :f32) {

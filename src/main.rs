@@ -6,11 +6,13 @@ mod enemy_vector;
 mod hero_circle;
 
 use macroquad::prelude::*;
+use std::fs;
 use crate::bullet_vector::BulletVector;
 use crate::hero_circle::HeroCircle;
 use crate::enemy_vector::EnemyVector;
 
 const MOVEMENT_SPEED: f32 = 200.0;
+const SHOT_FREQUENCY: f64 = 0.25;
 
 // tell Macroquad which function will be run when application starts, and what will be the window title
 #[macroquad::main("My Shmup")]
@@ -25,6 +27,12 @@ async fn main() {
     let mut enemy_vector: EnemyVector = EnemyVector::new();
     let mut bullet_vector: BulletVector = BulletVector::new();
     let mut circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
+
+    let mut score : u32 = 0;
+    let mut high_score : u32 = fs::read_to_string("highscore.dat")
+        .map_or(Ok(0), |i| i.parse::<u32>())
+        .unwrap_or(0);
+    let mut high_score_toppled = false;
 
     loop {
         // UPDATE
@@ -56,38 +64,57 @@ async fn main() {
                 circle.move_up();
             }
             if is_key_pressed(KeyCode::Space) {
-                bullet_vector.fire(&circle.shape.x, &circle.shape.y);
+                let shots_fired = get_time();
+                // println!("{}", shots_fired);
+
+                if shots_fired > bullet_vector.last_time_fired + SHOT_FREQUENCY {
+                    bullet_vector.fire(&circle.shape.x, &circle.shape.y);
+                    bullet_vector.last_time_fired = shots_fired;
+                }
             }
 
             // move squares down the screen
             enemy_vector.move_enemies(delta_time);
+            enemy_vector.hide_enemies();
             // move bullets
             bullet_vector.move_bullets(delta_time);
-
+            bullet_vector.hide_bullets();
 
             // COLLISION DETECTION
             if enemy_vector.collides_with(circle.clone()) {
+                if score == high_score {
+                    fs::write("highscore.dat", high_score.to_string()).ok();
+                }
                 is_gameover = true;
             }
 
-            enemy_vector.collides_with_bullets(&mut bullet_vector);
+            if enemy_vector.collides_with_bullets(&mut bullet_vector) {
+                // score += square.size.round() as u32;
+                score += 1;
 
-            enemy_vector.hide_enemies();
-            bullet_vector.hide_bullets();
+                if high_score < score {
+                    high_score_toppled = true;
+                }
+
+                high_score = high_score.max(score);
+            }
 
             // DRAW
             enemy_vector.draw_enemies();
             bullet_vector.draw_bullets();
             circle.draw();
+            draw_high_score(score, high_score);
         } else {
             if is_key_pressed(KeyCode::Space) {
                 enemy_vector.clear();
-                bullet_vector.clear();                
+                bullet_vector.clear();
+                score = 0;
+                high_score_toppled = false;
                 circle = HeroCircle::new(screen_center_x, screen_center_y, MOVEMENT_SPEED);
                 is_gameover = false;
             }
             else {
-                set_game_over(screen_center_x, screen_center_y);
+                set_game_over(screen_center_x, screen_center_y, high_score, high_score_toppled);
             }
         }
 
@@ -96,14 +123,47 @@ async fn main() {
     }
 }
 
-fn set_game_over(x : f32, y : f32) {
+fn set_game_over(x : f32, y : f32, high_score: u32, is_new_high_score : bool) {
     let text = "GAME OVER!";
     let text_dimensions = measure_text(text, None, 50, 1.0);
+
+    let caption_x: f32 = x - text_dimensions.width / 2.0;
+    let caption_y: f32 = y - text_dimensions.height / 2.0;
+
     draw_text(
         text,
-        x - text_dimensions.width / 2.0,
-        y - text_dimensions.height / 2.0,
+        caption_x,
+        caption_y,
         50.0,
         RED,
+    );
+
+    if is_new_high_score {
+        let score_text = format!("Your new high score is: {}", high_score);
+        let score_text_dimensions = measure_text(&score_text, None, 50, 1.0);
+        draw_text(
+            &score_text,
+            x - score_text_dimensions.width / 2.0,
+            caption_y + 50.0,
+            50.0,
+            RED,
+        );
+    }
+}
+
+fn draw_high_score(score: u32, high_score: u32) {
+    draw_score(60.0, "Score", score);
+    draw_score(35.0, "High_score", high_score);
+}
+
+fn draw_score(y:f32, caption : &str, score: u32) {
+    let highscore_text = format!("{}: {}", caption, score);
+    let text_dimensions = measure_text(highscore_text.as_str(), None, 25, 1.0);
+    draw_text(
+        &highscore_text.as_str(),
+        screen_width() - text_dimensions.width - 10.0, 
+        y,
+        25.0,
+        WHITE
     );
 }
