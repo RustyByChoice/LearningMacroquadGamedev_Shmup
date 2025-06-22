@@ -5,17 +5,17 @@ mod enemy_square;
 mod enemy_vector;
 mod hero_circle;
 mod high_score;
+mod caption;
 
 use macroquad::prelude::*;
 use crate::bullet_vector::BulletVector;
 use crate::hero_circle::HeroCircle;
 use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
+use crate::caption::Caption;
 
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
-const FONT_SIZE : f32 = 50.0;
-const FONT_SCALE : f32 = 1.0;
 
 enum GameState {
     MainMenu,
@@ -24,7 +24,6 @@ enum GameState {
     GameOver
 }
 
-// tell Macroquad which function will be run when application starts, and what will be the window title
 #[macroquad::main("My Shmup")]
 async fn main() {
     rand::srand(miniquad::date::now() as u64);
@@ -55,7 +54,7 @@ async fn main() {
                     game_state = GameState::Playing;
                 }
 
-                put_text_in_center("Press space");
+                put_text_in_center(Caption::default("Press space"));
             }
             GameState::Playing => {
                 // time that passed since the last frame
@@ -121,13 +120,13 @@ async fn main() {
                 if is_key_pressed(KeyCode::Space) {
                     game_state = GameState::Playing;
                 }
-                put_text_in_center("Paused");
+                put_text_in_center(Caption::default("Paused"));
             }
             GameState::GameOver => {
                 if is_key_pressed(KeyCode::Space) {
                     game_state = GameState::MainMenu;
                 }
-                set_game_over(get_center_x(), get_center_y(), &high_score);                
+                set_game_over(&high_score);                
             }
         }
 
@@ -136,60 +135,68 @@ async fn main() {
     }
 }
 
-fn set_game_over(x : f32, y : f32, high_score: &HighScore) {
-    let text = "GAME OVER!";
-    let text_dimensions = measure_text(text, None, 50, FONT_SCALE);
+fn set_game_over(high_score: &HighScore) {
+    let x = get_center_x();
+    let y = get_center_y();
 
-    let caption_x: f32 = x - text_dimensions.width / 2.0;
-    let caption_y: f32 = y - text_dimensions.height / 2.0;
+    let text = Caption::new(
+        "GAME OVER!".to_owned(), 
+        Some(RED), 
+        None, 
+        None);
+
+    let caption_y: f32 = y - text.get_dimensions().height / 2.0;
 
     draw_text(
-        text,
-        caption_x,
+        &text.text,
+        x - text.get_dimensions().width / 2.0,
         caption_y,
-        FONT_SIZE,
-        RED,
+        *&text.font_size,
+        *&text.color
     );
 
     if high_score.is_new_high() {
-        let score_text = format!("Your new high score is: {}", high_score.get_current_high());
-        let score_text_dimensions = measure_text(&score_text, None, 50, FONT_SCALE);
+        let score_text = Caption::new(
+            format!("Your new high score is: {}", high_score.get_current_high()), 
+            Some(RED), 
+            None, 
+            None);
+
         draw_text(
-            &score_text,
-            x - score_text_dimensions.width / 2.0,
-            caption_y + FONT_SIZE,
-            FONT_SIZE,
-            RED,
+            &score_text.text,
+            x - score_text.get_dimensions().width / 2.0,
+            caption_y + &text.font_size,
+            score_text.font_size,
+            score_text.color,
         );
     }
 }
 
 fn draw_high_score(score: &HighScore) {
-    draw_score(35.0, "High_score", score.get_current_high());
-    draw_score(60.0, "Score", score.get_current_score());
+    let high_score = format!("High Score: {}", score.get_current_high());
+    draw_score(35.0, Caption::new(high_score, None, Some(25.0), None));
+
+    let score = format!("Score: {}", score.get_current_score());
+    draw_score(60.0, Caption::new(score, None, Some(25.0), None));
 }
 
-fn draw_score(y:f32, caption : &str, score: u32) {
-    let highscore_font_size : f32 = 25.0;
-    let highscore_text = format!("{}: {}", caption, score);
-    let text_dimensions = measure_text(&highscore_text, None, highscore_font_size as u16, FONT_SCALE);
+fn draw_score(y:f32, caption : Caption) {
     draw_text(
-        &highscore_text,
-        screen_width() - text_dimensions.width - 10.0, 
+        &caption.text,
+        screen_width() - caption.get_dimensions().width - 10.0, 
         y,
-        highscore_font_size,
-        WHITE
+        *&caption.font_size,
+        *&caption.color
     );
 }
 
-fn put_text_in_center(text : &str) {
-    let text_dimensions = measure_text(text, None, FONT_SIZE as u16, FONT_SCALE);
+fn put_text_in_center(caption : Caption) {
     draw_text(
-        text, 
-        get_center_x() - text_dimensions.width / 2.0, 
+        &caption.text, 
+        get_center_x() - caption.get_dimensions().width / 2.0, 
         get_center_y(), 
-        FONT_SIZE, 
-        WHITE
+        *&caption.font_size,
+        *&caption.color
     );
 }
 
