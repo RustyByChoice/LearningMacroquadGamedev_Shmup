@@ -54,7 +54,15 @@ async fn main() {
                     game_state = GameState::Playing;
                 }
 
-                put_text_in_center(Caption::default("Press space"));
+                let title = Caption::new(
+                    "SHMUP'EM UP!".to_string(),
+                    None,
+                    Some(100.0),
+                    None
+                );
+
+                put_text_in_center(Some(get_center_y() - title.get_dimensions().height), title);
+                put_text_in_center(None, Caption::default("Press space"));
             }
             GameState::Playing => {
                 // time that passed since the last frame
@@ -120,7 +128,7 @@ async fn main() {
                 if is_key_pressed(KeyCode::Space) {
                     game_state = GameState::Playing;
                 }
-                put_text_in_center(Caption::default("Paused"));
+                put_text_in_center(None, Caption::default("Paused"));
             }
             GameState::GameOver => {
                 if is_key_pressed(KeyCode::Space) {
@@ -190,11 +198,13 @@ fn draw_score(y:f32, caption : Caption) {
     );
 }
 
-fn put_text_in_center(caption : Caption) {
+fn put_text_in_center(y : Option<f32>, caption : Caption) {
+    let y = y.unwrap_or(get_center_y());
+
     draw_text(
         &caption.text, 
         get_center_x() - caption.get_dimensions().width / 2.0, 
-        get_center_y(), 
+        y, 
         *&caption.font_size,
         *&caption.color
     );
