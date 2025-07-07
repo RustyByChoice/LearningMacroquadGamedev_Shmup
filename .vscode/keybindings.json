@@ -1,0 +1,8 @@
+[
+    {
+        "key": "f9", // Or your preferred key like "ctrl+alt+r"
+        "command": "workbench.action.tasks.runTask",
+        "args": "rust: cargo run", // Use the exact label of your task
+        "when": "editorLangId == 'rust'"
+    }
+]
