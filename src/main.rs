@@ -14,6 +14,9 @@ use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
 use crate::caption::Caption;
 
+const FRAGMENT_SHADER: &str = include_str!("shaders/starfield-shader.glsl");
+const VERTEX_SHADER: &str = include_str!("shaders/vertex-shader.glsl");
+
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
 
@@ -28,6 +31,23 @@ enum GameState {
 async fn main() {
     rand::srand(miniquad::date::now() as u64);
 
+    let mut direction_modifier: f32 = 0.0;
+    let render_target = render_target(320, 150);
+    render_target.texture.set_filter(FilterMode::Nearest);
+    let material = load_material(
+        ShaderSource::Glsl { 
+            vertex: VERTEX_SHADER, 
+            fragment: FRAGMENT_SHADER 
+        }, MaterialParams { 
+            //pipeline_params: (), 
+            uniforms: vec![
+                UniformDesc::new("iResolution", UniformType::Float2),
+                UniformDesc::new("direction_modifier", UniformType::Float1),
+            ],
+            ..Default::default()
+            // textures: ()
+        }).unwrap();
+
     let mut game_state = GameState::MainMenu;
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
@@ -37,7 +57,22 @@ async fn main() {
     let mut high_score = HighScore::new();
 
     loop {
-        clear_background(DARKPURPLE);
+        clear_background(BLACK);
+
+        material.set_uniform("iResolution", (screen_width(), screen_height()));
+        material.set_uniform("direction_modifier", direction_modifier);
+        gl_use_material(&material);
+        draw_texture_ex(&render_target.texture, 0., 0., WHITE, DrawTextureParams 
+            { 
+                dest_size: Some(vec2(screen_width(), screen_height())),
+                ..Default::default() 
+                // source: (), 
+                // rotation: (), 
+                // flip_x: (), 
+                // flip_y: (), 
+                // pivot: () 
+            });
+        gl_use_default_material();
 
         match game_state {
             GameState::MainMenu => {
@@ -74,9 +109,11 @@ async fn main() {
 
                 if is_key_down(KeyCode::Right) {
                     circle.move_right();
+                    direction_modifier += 0.05 * delta_time;
                 }
                 if is_key_down(KeyCode::Left) {
                     circle.move_left();
+                    direction_modifier -= 0.05 * delta_time;
                 }
                 if is_key_down(KeyCode::Down) {
                     circle.move_down();
