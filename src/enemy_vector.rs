@@ -8,14 +8,19 @@ pub struct EnemyVector {
 }
 
 impl EnemyVector {
+    const ENEMY_COLORS : [Color; 4] = [GRAY, BEIGE, PINK, RED];
+
     pub fn new() -> EnemyVector {
         let enemies = vec![];
 
         return EnemyVector { enemies };
     }
 
-    pub fn spawn_enemy(&mut self, size :f32, color :Color) {
-        self.enemies.push(EnemySquare::new(size, color));
+    pub fn spawn_enemy(&mut self) {
+        let size = rand::gen_range(16.0, 64.0);
+        let color = rand::gen_range(0, Self::ENEMY_COLORS.len());
+
+        self.enemies.push(EnemySquare::new(size, Self::ENEMY_COLORS[color]));
     }
 
     pub fn hide_enemies(&mut self) {

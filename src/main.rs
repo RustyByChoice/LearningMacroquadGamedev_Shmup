@@ -30,8 +30,6 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    let enemy_colors = [GRAY, BEIGE, PINK, RED];
-
     let mut enemy_vector: EnemyVector = EnemyVector::new();
     let mut bullet_vector: BulletVector = BulletVector::new();
     let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
@@ -71,10 +69,7 @@ async fn main() {
                 circle.set_speed(MOVEMENT_SPEED * delta_time);
 
                 if rand::gen_range(0, 99) >= 95 {
-                    let size = rand::gen_range(16.0, 64.0);
-                    let color = rand::gen_range(0, enemy_colors.len());
-
-                    enemy_vector.spawn_enemy(size, enemy_colors[color]);
+                    enemy_vector.spawn_enemy();
                 }
 
                 if is_key_down(KeyCode::Right) {
