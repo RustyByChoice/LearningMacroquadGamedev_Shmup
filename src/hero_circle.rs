@@ -64,3 +64,5 @@ impl HeroCircle {
         self.shape.speed = new_speed;
     }
 }
+
+// TODO: read the documentation for EmitterConfig and try what happens if you change different values. Can you add a particle system that shoots particles out of the circle so it looks like a rocket exhaust?
