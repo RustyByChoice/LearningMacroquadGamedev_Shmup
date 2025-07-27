@@ -13,7 +13,7 @@ impl Bullet {
                 x: start_x,
                 y: start_y,
                 speed: 50.0,
-                size: 5.0,
+                size: 32.0,
                 color: YELLOW,
                 collided: false,
             },
