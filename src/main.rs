@@ -7,8 +7,10 @@ mod hero_circle;
 mod high_score;
 mod caption;
 mod starfield_shader;
+mod game_resources;
 
 use macroquad::prelude::*;
+use macroquad::experimental::animation::{AnimatedSprite, Animation};
 
 use crate::bullet_vector::BulletVector;
 use crate::hero_circle::HeroCircle;
@@ -31,6 +33,8 @@ enum GameState {
 async fn main() {
     rand::srand(miniquad::date::now() as u64);
 
+    set_pc_assets_folder("assets");
+
     let mut starfield_shader : StarfieldShader = StarfieldShader::new(
         include_str!("shaders/starfield-shader.glsl"),
         include_str!("shaders/vertex-shader.glsl"),
@@ -38,11 +42,46 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
+    // TODO: Hashmap na enum nazwy tekstury i obiekty Texture2D
+    let texture_bullet = load_texture("laser-bolts.png").await.expect("Couldn't load bullet texture file");
+    texture_bullet.set_filter(FilterMode::Nearest);
+
     let mut enemy_vector: EnemyVector = EnemyVector::new();
-    let mut bullet_vector: BulletVector = BulletVector::new();
+    let mut bullet_vector: BulletVector = BulletVector::new(texture_bullet);
     let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
 
     let mut high_score = HighScore::new();
+
+    let texture_ship = load_texture("ship.png").await.expect("Couldn't load ship texture file");
+    texture_ship.set_filter(FilterMode::Nearest);
+
+    // ensure that draw_texture calls will use atlas and not separate textures
+    build_textures_atlas();
+
+    let mut ship_sprite = AnimatedSprite::new(
+        16, 24,
+        &[
+            Animation {
+                name: "idle".to_string(),
+                row: 0,
+                frames: 2,
+                fps: 12
+            },
+            Animation {
+                name: "left".to_string(),
+                row: 2,
+                frames: 2,
+                fps: 12
+            },
+            Animation {
+                name: "right".to_string(),
+                row: 4,
+                frames: 2,
+                fps: 12
+            },
+        ],
+        true,
+    );
 
     loop {
         clear_background(BLACK);
@@ -82,13 +121,16 @@ async fn main() {
                     enemy_vector.spawn_enemy();
                 }
 
+                ship_sprite.set_animation(0);
                 if is_key_down(KeyCode::Right) {
                     circle.move_right();
                     starfield_shader.direction_modifier += 0.05 * delta_time;
+                    ship_sprite.set_animation(2);
                 }
                 if is_key_down(KeyCode::Left) {
                     circle.move_left();
                     starfield_shader.direction_modifier -= 0.05 * delta_time;
+                    ship_sprite.set_animation(1);
                 }
                 if is_key_down(KeyCode::Down) {
                     circle.move_down();
@@ -100,7 +142,7 @@ async fn main() {
                     let shots_fired = get_time();
 
                     if shots_fired > bullet_vector.last_time_fired + SHOT_FREQUENCY {
-                        bullet_vector.fire(&circle.shape.x, &circle.shape.y);
+                        bullet_vector.fire(&circle.shape.x, &(circle.shape.y - 24.0));
                         bullet_vector.last_time_fired = shots_fired;
                     }
                 }
@@ -114,6 +156,8 @@ async fn main() {
                 // move bullets
                 bullet_vector.move_bullets(delta_time);
                 bullet_vector.hide_bullets();
+
+                ship_sprite.update();
 
                 // COLLISION DETECTION
                 if enemy_vector.collides_with(circle.clone()) {
@@ -222,5 +266,5 @@ fn get_center_x() -> f32 {
 }
 
 fn get_center_y() -> f32 {
-    screen_height() / 2.0   
+    screen_height() / 2.0
 }
