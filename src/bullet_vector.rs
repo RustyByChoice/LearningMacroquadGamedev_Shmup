@@ -2,15 +2,15 @@ use macroquad::experimental::animation::{AnimatedSprite, Animation};
 use crate::bullet::Bullet;
 use macroquad::prelude::*;
 
-pub struct BulletVector {
+pub struct BulletVector<'a> {
     pub bullets: Vec<Bullet>,
     pub last_time_fired : f64,
-    pub bullet_texture: Texture2D,
+    pub bullet_texture: &'a Texture2D,
     pub bullet_sprite: AnimatedSprite,
 }
 
-impl BulletVector {
-    pub fn new(texture_bullet: Texture2D) -> BulletVector {
+impl BulletVector<'_> {
+    pub fn new(texture_bullet: &Texture2D) -> BulletVector {
         let bullets = vec![];
 
         let bullet_sprite = AnimatedSprite::new(

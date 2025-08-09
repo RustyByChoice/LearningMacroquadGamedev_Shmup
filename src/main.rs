@@ -18,6 +18,7 @@ use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
 use crate::caption::Caption;
 use crate::starfield_shader::StarfieldShader;
+use crate::game_resources::{load_textures,AssetKey,TextureHashMapExtensions};
 
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
@@ -34,6 +35,7 @@ async fn main() {
     rand::srand(miniquad::date::now() as u64);
 
     set_pc_assets_folder("assets");
+    let textures = load_textures().await;
 
     let mut starfield_shader : StarfieldShader = StarfieldShader::new(
         include_str!("shaders/starfield-shader.glsl"),
@@ -42,12 +44,8 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    // TODO: Hashmap na enum nazwy tekstury i obiekty Texture2D
-    let texture_bullet = load_texture("laser-bolts.png").await.expect("Couldn't load bullet texture file");
-    texture_bullet.set_filter(FilterMode::Nearest);
-
     let mut enemy_vector: EnemyVector = EnemyVector::new();
-    let mut bullet_vector: BulletVector = BulletVector::new(texture_bullet);
+    let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
     let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
 
     let mut high_score = HighScore::new();

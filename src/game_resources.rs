@@ -1,36 +1,48 @@
 use std::collections::HashMap;
 use macroquad::prelude::*;
 
-#[derive(Hash, Eq, PartialEq)]
+#[derive(Hash, Eq, PartialEq, Clone)]
 pub enum AssetKey {
     Ship,
-    Laser_Bolts,
+    LaserBolts,
     // Add more texture keys as needed
 }
 
-pub struct TextureManager {
-    textures: HashMap<AssetKey, Texture2D>,
+struct TextureMap {
+    key: AssetKey,
+    file_name: String,
 }
 
-impl TextureManager {
-    pub fn new() -> Self {
-        Self {
-            textures: HashMap::new(),
-        }
-    }
+fn get_texture_map() -> Vec<TextureMap> {
+    vec!
+    [
+        TextureMap { key: AssetKey::Ship, file_name: "ship.png".to_owned() },
+        TextureMap { key: AssetKey::LaserBolts, file_name: "laser-bolts.png".to_owned() }
+    ]
+}
 
-    pub fn load_textures() -> 
-    pub async fn load_texture(&mut self, key: AssetKey, path: &str) -> Result<(), String> {
-        let texture = load_texture(path)
-            .await
-            .map_err(|e| format!("Failed to load texture: {}", e))?;
-        
+pub async fn load_textures() -> HashMap<AssetKey, Texture2D> {
+    let map = get_texture_map();
+    let mut hashes = HashMap::new();
+
+    for texture_map in map {
+        let error_message = format!("Couldn't load texture file {}", texture_map.file_name);
+
+        let texture = load_texture(&texture_map.file_name).await.expect(&error_message);
         texture.set_filter(FilterMode::Nearest);
-        self.textures.insert(key, texture);
-        Ok(())
+
+        hashes.insert(texture_map.key.clone(), texture);
     }
 
-    pub fn get_texture(&self, key: &AssetKey) -> Option<&Texture2D> {
-        self.textures.get(key)
+    hashes
+}
+
+pub trait TextureHashMapExtensions {
+    fn take(&self, key: &AssetKey) -> &Texture2D;
+}
+
+impl TextureHashMapExtensions for HashMap<AssetKey, Texture2D> {
+    fn take(&self, key: &AssetKey) -> &Texture2D {
+        self.get(key).unwrap()
     }
 }
