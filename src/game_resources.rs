@@ -1,7 +1,6 @@
 use macroquad::prelude::*;
 use std::collections::HashMap;
 use strum_macros::{EnumIter, EnumCount};
-use strum::IntoEnumIterator;
 
 // TODO: Can enum variants pass Texture2D as objects in them? What is the gain?
 
