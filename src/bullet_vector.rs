@@ -11,8 +11,7 @@ pub struct BulletVector<'a> {
 
 impl BulletVector<'_> {
     pub fn new(texture_bullet: &Texture2D) -> BulletVector {
-        let bullets = vec![];
-
+        // TODO: This should be generated from a CSV or something
         let bullet_sprite = AnimatedSprite::new(
             16, 16,
             &[
@@ -33,7 +32,7 @@ impl BulletVector<'_> {
         );
 
         BulletVector {
-            bullets: bullets,
+            bullets: vec![],
             last_time_fired: 0.,
             bullet_texture: texture_bullet,
             bullet_sprite: bullet_sprite
@@ -70,18 +69,10 @@ impl BulletVector<'_> {
                     ..Default::default()
                 }
             );
-            // draw_circle_lines(
-            //     bullet.shape.x,
-            //     bullet.shape.y,
-            //     bullet.shape.size / 2.0,
-            //     1.0,
-            //     RED,
-            // );
         }
     }
 
     pub fn clear(&mut self) {
         self.bullets.clear();
     }
-
 }
