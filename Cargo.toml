@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 macroquad = "0.4.14"
 macroquad-particles = "0.2.2"
+strum = "0.26"
+strum_macros = "0.26"
