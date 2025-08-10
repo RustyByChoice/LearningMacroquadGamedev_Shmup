@@ -8,6 +8,7 @@ mod high_score;
 mod caption;
 mod starfield_shader;
 mod game_resources;
+mod texture_hash_map;
 
 use macroquad::prelude::*;
 use macroquad::experimental::animation::{AnimatedSprite, Animation};
@@ -18,7 +19,8 @@ use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
 use crate::caption::Caption;
 use crate::starfield_shader::StarfieldShader;
-use crate::game_resources::{load_textures,AssetKey,TextureHashMapExtensions};
+use crate::game_resources::{AssetKey,load_textures};
+use crate::texture_hash_map::{TextureHashMap};
 
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
@@ -44,17 +46,8 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    let mut enemy_vector: EnemyVector = EnemyVector::new();
-    let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
-    let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
-
-    let mut high_score = HighScore::new();
-
     let texture_ship = load_texture("ship.png").await.expect("Couldn't load ship texture file");
     texture_ship.set_filter(FilterMode::Nearest);
-
-    // ensure that draw_texture calls will use atlas and not separate textures
-    build_textures_atlas();
 
     let mut ship_sprite = AnimatedSprite::new(
         16, 24,
@@ -81,6 +74,15 @@ async fn main() {
         true,
     );
 
+    let mut enemy_vector: EnemyVector = EnemyVector::new();
+    let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
+    let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
+
+    let mut high_score = HighScore::new();
+
+    // ensure that draw_texture calls will use atlas and not separate textures
+    build_textures_atlas();
+ 
     loop {
         clear_background(BLACK);
 
