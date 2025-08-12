@@ -3,8 +3,8 @@ use crate::shape::Shape;
 use crate::hero_circle::HeroCircle;
 use crate::bullet::Bullet;
 
-pub enum GameEntity {
-    Hero(HeroCircle),
+pub enum GameEntity<'a> {
+    Hero(HeroCircle<'a>),
     Projectile(Bullet),
 }
 

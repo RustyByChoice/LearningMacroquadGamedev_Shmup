@@ -11,7 +11,6 @@ mod game_resources;
 mod texture_hash_map;
 
 use macroquad::prelude::*;
-use macroquad::experimental::animation::{AnimatedSprite, Animation};
 
 use crate::bullet_vector::BulletVector;
 use crate::hero_circle::HeroCircle;
@@ -46,37 +45,12 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    let texture_ship = load_texture("ship.png").await.expect("Couldn't load ship texture file");
-    texture_ship.set_filter(FilterMode::Nearest);
-
-    let mut ship_sprite = AnimatedSprite::new(
-        16, 24,
-        &[
-            Animation {
-                name: "idle".to_string(),
-                row: 0,
-                frames: 2,
-                fps: 12
-            },
-            Animation {
-                name: "left".to_string(),
-                row: 2,
-                frames: 2,
-                fps: 12
-            },
-            Animation {
-                name: "right".to_string(),
-                row: 4,
-                frames: 2,
-                fps: 12
-            },
-        ],
-        true,
-    );
+    // let texture_ship = load_texture("ship.png").await.expect("Couldn't load ship texture file");
+    // texture_ship.set_filter(FilterMode::Nearest);
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
     let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
-    let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
+    let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
 
     let mut high_score = HighScore::new();
 
@@ -97,7 +71,7 @@ async fn main() {
                     enemy_vector.clear();
                     bullet_vector.clear();
                     high_score.clear();
-                    circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED);
+                    circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
                     game_state = GameState::Playing;
                 }
 
@@ -121,16 +95,14 @@ async fn main() {
                     enemy_vector.spawn_enemy();
                 }
 
-                ship_sprite.set_animation(0);
+                circle.set_idle();
                 if is_key_down(KeyCode::Right) {
                     circle.move_right();
                     starfield_shader.direction_modifier += 0.05 * delta_time;
-                    ship_sprite.set_animation(2);
                 }
                 if is_key_down(KeyCode::Left) {
                     circle.move_left();
                     starfield_shader.direction_modifier -= 0.05 * delta_time;
-                    ship_sprite.set_animation(1);
                 }
                 if is_key_down(KeyCode::Down) {
                     circle.move_down();
@@ -157,7 +129,7 @@ async fn main() {
                 bullet_vector.move_bullets(delta_time);
                 bullet_vector.hide_bullets();
 
-                ship_sprite.update();
+                circle.update_sprite();
 
                 // COLLISION DETECTION
                 if enemy_vector.collides_with(circle.clone()) {
