@@ -3,14 +3,14 @@ use crate::shape::Shape;
 use macroquad::experimental::animation::{AnimatedSprite, Animation};
 
 #[derive(Clone)]
-pub struct HeroCircle<'a> {
+pub struct PlayerShip<'a> {
     pub shape: Shape,
     pub ship_sprite: AnimatedSprite,
     pub ship_texture: &'a Texture2D,
 }
 
-impl HeroCircle<'_> {
-    pub fn new(where_x : f32, where_y : f32, speed : f32, texture_ship: &Texture2D) -> HeroCircle {
+impl PlayerShip<'_> {
+    pub fn new(where_x : f32, where_y : f32, speed : f32, texture_ship: &Texture2D) -> PlayerShip {
 
         let ship_sprite = AnimatedSprite::new(
             16, 24,
@@ -37,7 +37,7 @@ impl HeroCircle<'_> {
             true,
         );
 
-        return HeroCircle {
+        return PlayerShip {
             shape: Shape {
                 size: 32.0,
                 speed: speed,
@@ -51,6 +51,7 @@ impl HeroCircle<'_> {
         };
     }
 
+    // TODO: how to refine collision boxes on the sprite?
     pub fn as_circle(&self) -> Circle {
         Circle {
             x: self.shape.x,

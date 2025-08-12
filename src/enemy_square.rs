@@ -1,10 +1,10 @@
 use macroquad::prelude::*;
 use crate::shape::Shape;
-use crate::hero_circle::HeroCircle;
+use crate::player_ship::PlayerShip;
 use crate::bullet::Bullet;
 
 pub enum GameEntity<'a> {
-    Hero(HeroCircle<'a>),
+    Hero(PlayerShip<'a>),
     Projectile(Bullet),
 }
 

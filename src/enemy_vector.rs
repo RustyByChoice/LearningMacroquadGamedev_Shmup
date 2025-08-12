@@ -1,6 +1,6 @@
 use macroquad::prelude::*;
 use crate::bullet_vector::BulletVector;
-use crate::HeroCircle;
+use crate::PlayerShip;
 use crate::enemy_square::{GameEntity,EnemySquare};
 use macroquad_particles::{self as particles, ColorCurve, Emitter, EmitterConfig};
 
@@ -54,10 +54,10 @@ impl EnemyVector {
         }
     }
 
-    pub fn collides_with(&mut self, circle : HeroCircle) -> bool {
+    pub fn collides_with(&mut self, player : PlayerShip) -> bool {
         self.enemies
             .iter_mut()
-            .any(|e| e.collides_with(GameEntity::Hero(circle.clone())))
+            .any(|e| e.collides_with(GameEntity::Hero(player.clone())))
     }
 
     pub fn collides_with_bullets(&mut self, bullets : &mut BulletVector) -> bool {

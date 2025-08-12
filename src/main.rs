@@ -3,7 +3,7 @@ mod bullet;
 mod bullet_vector;
 mod enemy_square;
 mod enemy_vector;
-mod hero_circle;
+mod player_ship;
 mod high_score;
 mod caption;
 mod starfield_shader;
@@ -13,7 +13,7 @@ mod texture_hash_map;
 use macroquad::prelude::*;
 
 use crate::bullet_vector::BulletVector;
-use crate::hero_circle::HeroCircle;
+use crate::player_ship::PlayerShip;
 use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
 use crate::caption::Caption;
@@ -50,7 +50,7 @@ async fn main() {
 
     let mut enemy_vector: EnemyVector = EnemyVector::new();
     let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
-    let mut circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
+    let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
 
     let mut high_score = HighScore::new();
 
@@ -71,7 +71,7 @@ async fn main() {
                     enemy_vector.clear();
                     bullet_vector.clear();
                     high_score.clear();
-                    circle = HeroCircle::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
+                    player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
                     game_state = GameState::Playing;
                 }
 
@@ -89,32 +89,32 @@ async fn main() {
                 // time that passed since the last frame
                 let delta_time = get_frame_time();
 
-                circle.set_speed(MOVEMENT_SPEED * delta_time);
+                player_ship.set_speed(MOVEMENT_SPEED * delta_time);
 
                 if rand::gen_range(0, 99) >= 95 {
                     enemy_vector.spawn_enemy();
                 }
 
-                circle.set_idle();
+                player_ship.set_idle();
                 if is_key_down(KeyCode::Right) {
-                    circle.move_right();
+                    player_ship.move_right();
                     starfield_shader.direction_modifier += 0.05 * delta_time;
                 }
                 if is_key_down(KeyCode::Left) {
-                    circle.move_left();
+                    player_ship.move_left();
                     starfield_shader.direction_modifier -= 0.05 * delta_time;
                 }
                 if is_key_down(KeyCode::Down) {
-                    circle.move_down();
+                    player_ship.move_down();
                 }
                 if is_key_down(KeyCode::Up) {
-                    circle.move_up();
+                    player_ship.move_up();
                 }
                 if is_key_pressed(KeyCode::Space) {
                     let shots_fired = get_time();
 
                     if shots_fired > bullet_vector.last_time_fired + SHOT_FREQUENCY {
-                        bullet_vector.fire(&circle.shape.x, &(circle.shape.y - 24.0));
+                        bullet_vector.fire(&player_ship.shape.x, &(player_ship.shape.y - 24.0));
                         bullet_vector.last_time_fired = shots_fired;
                     }
                 }
@@ -129,10 +129,10 @@ async fn main() {
                 bullet_vector.move_bullets(delta_time);
                 bullet_vector.hide_bullets();
 
-                circle.update_sprite();
+                player_ship.update_sprite();
 
                 // COLLISION DETECTION
-                if enemy_vector.collides_with(circle.clone()) {
+                if enemy_vector.collides_with(player_ship.clone()) {
                     high_score.save_high_score();
                     game_state = GameState::GameOver;
                 }
@@ -144,7 +144,7 @@ async fn main() {
                 // DRAW
                 enemy_vector.draw_enemies();
                 bullet_vector.draw_bullets();
-                circle.draw();
+                player_ship.draw();
                 draw_high_score(&high_score);                
             }
             GameState::Paused => {
