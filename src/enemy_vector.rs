@@ -41,13 +41,7 @@ impl EnemyVector<'_> {
 
     pub fn draw_enemies(&mut self) {
         for enemy in &self.enemies {
-            draw_rectangle(
-                enemy.shape.x - enemy.shape.size / 2.0,
-                enemy.shape.y - enemy.shape.size / 2.0,
-                enemy.shape.size,
-                enemy.shape.size,
-                enemy.shape.color,
-            );
+            enemy.draw();
         }
 
         for (explosion, coords) in self.explosions.iter_mut() {
@@ -105,7 +99,6 @@ fn particle_explosion() -> particles::EmitterConfig {
         size: 16.0,
         size_randomness: 0.3,
         atlas: Some(AtlasConfig::new(5, 1, 0..)),
-        // colors_curve: ColorCurve { start: RED, mid: ORANGE, end: RED },
         ..Default::default()
     }
 }

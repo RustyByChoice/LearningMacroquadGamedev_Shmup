@@ -45,4 +45,14 @@ impl EnemySquare {
             },
         }
     }
+
+    pub fn draw(&self) {
+        draw_rectangle(
+            self.shape.x - self.shape.size / 2.0,
+            self.shape.y - self.shape.size / 2.0,
+            self.shape.size,
+            self.shape.size,
+            self.shape.color,
+        );
+    }
 }
