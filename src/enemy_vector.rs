@@ -2,21 +2,22 @@ use macroquad::prelude::*;
 use crate::bullet_vector::BulletVector;
 use crate::PlayerShip;
 use crate::enemy_square::{GameEntity,EnemySquare};
-use macroquad_particles::{self as particles, ColorCurve, Emitter, EmitterConfig};
+use macroquad_particles::{self as particles, AtlasConfig, Emitter, EmitterConfig};
 
-pub struct EnemyVector {
+pub struct EnemyVector<'a> {
     enemies: Vec<EnemySquare>,
     explosions: Vec<(Emitter, Vec2)>,
+    explosion_texture: &'a Texture2D,
 }
 
-impl EnemyVector {
+impl EnemyVector<'_> {
     const ENEMY_COLORS : [Color; 4] = [GRAY, BEIGE, PINK, RED];
 
-    pub fn new() -> EnemyVector {
+    pub fn new(texture_explosion: &Texture2D) -> EnemyVector {
         let enemies = vec![];
         let explosions = vec![];
 
-        return EnemyVector { enemies, explosions }
+        return EnemyVector { enemies, explosions, explosion_texture: texture_explosion }
     }
 
     pub fn spawn_enemy(&mut self) {
@@ -69,7 +70,8 @@ impl EnemyVector {
 
                     self.explosions.push((
                         Emitter::new(EmitterConfig { 
-                            amount: enemy.shape.size.round() as u32 * 2,
+                            amount: enemy.shape.size.round() as u32 * 4,
+                            texture: Some(self.explosion_texture.clone()),
                             ..particle_explosion()
                         }),
                         vec2(enemy.shape.x, enemy.shape.y),
@@ -98,11 +100,12 @@ fn particle_explosion() -> particles::EmitterConfig {
         lifetime_randomness: 0.3,
         explosiveness: 0.65,
         initial_direction_spread: 2.0 * std::f32::consts::PI,
-        initial_velocity: 300.0,
+        initial_velocity: 400.0,
         initial_velocity_randomness: 0.8,
-        size: 3.0,
+        size: 16.0,
         size_randomness: 0.3,
-        colors_curve: ColorCurve { start: RED, mid: ORANGE, end: RED },
+        atlas: Some(AtlasConfig::new(5, 1, 0..)),
+        // colors_curve: ColorCurve { start: RED, mid: ORANGE, end: RED },
         ..Default::default()
     }
 }

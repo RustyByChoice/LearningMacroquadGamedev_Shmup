@@ -37,6 +37,8 @@ async fn main() {
 
     set_pc_assets_folder("assets");
     let textures = load_textures().await;
+    // ensure that draw_texture calls will use atlas and not separate textures
+    build_textures_atlas();
 
     let mut starfield_shader : StarfieldShader = StarfieldShader::new(
         include_str!("shaders/starfield-shader.glsl"),
@@ -45,17 +47,12 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    // let texture_ship = load_texture("ship.png").await.expect("Couldn't load ship texture file");
-    // texture_ship.set_filter(FilterMode::Nearest);
-
-    let mut enemy_vector: EnemyVector = EnemyVector::new();
+    let mut enemy_vector: EnemyVector = EnemyVector::new(textures.take(&AssetKey::Explosion));
     let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
     let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
 
     let mut high_score = HighScore::new();
 
-    // ensure that draw_texture calls will use atlas and not separate textures
-    build_textures_atlas();
  
     loop {
         clear_background(BLACK);

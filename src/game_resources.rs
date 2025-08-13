@@ -8,6 +8,7 @@ use strum_macros::{EnumIter, EnumCount};
 pub enum AssetKey {
     Ship,
     LaserBolts,
+    Explosion,
     // Add more texture keys as needed
 }
 
@@ -20,7 +21,8 @@ fn get_texture_map() -> Vec<TextureMap> {
     vec!
     [
         TextureMap { key: AssetKey::Ship, file_name: "ship.png".to_owned() },
-        TextureMap { key: AssetKey::LaserBolts, file_name: "laser-bolts.png".to_owned() }
+        TextureMap { key: AssetKey::LaserBolts, file_name: "laser-bolts.png".to_owned() },
+        TextureMap { key: AssetKey::Explosion, file_name: "explosion.png".to_owned() },
     ]
 }
 
@@ -43,6 +45,7 @@ pub async fn load_textures() -> HashMap<AssetKey, Texture2D> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use strum::IntoEnumIterator;
 
     #[test]
     fn ensure_that_all_asset_keys_have_textures_loaded() {
