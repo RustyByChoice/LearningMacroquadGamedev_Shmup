@@ -9,6 +9,9 @@ pub enum AssetKey {
     Ship,
     LaserBolts,
     Explosion,
+    EnemySmall,
+    EnemyMedium,
+    EnemyBig
     // Add more texture keys as needed
 }
 
@@ -23,6 +26,9 @@ fn get_texture_map() -> Vec<TextureMap> {
         TextureMap { key: AssetKey::Ship, file_name: "ship.png".to_owned() },
         TextureMap { key: AssetKey::LaserBolts, file_name: "laser-bolts.png".to_owned() },
         TextureMap { key: AssetKey::Explosion, file_name: "explosion.png".to_owned() },
+        TextureMap { key: AssetKey::EnemySmall, file_name: "enemy-small.png".to_owned() },
+        TextureMap { key: AssetKey::EnemyMedium, file_name: "enemy-medium.png".to_owned() },
+        TextureMap { key: AssetKey::EnemyBig, file_name: "enemy-big.png".to_owned() },
     ]
 }
 

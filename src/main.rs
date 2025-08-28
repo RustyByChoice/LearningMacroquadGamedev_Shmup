@@ -1,7 +1,7 @@
 mod shape;
 mod bullet;
 mod bullet_vector;
-mod enemy_square;
+mod enemy_ship;
 mod enemy_vector;
 mod player_ship;
 mod high_score;
@@ -9,6 +9,7 @@ mod caption;
 mod starfield_shader;
 mod game_resources;
 mod texture_hash_map;
+mod macroquad_helpers;
 
 use macroquad::prelude::*;
 
@@ -20,6 +21,7 @@ use crate::caption::Caption;
 use crate::starfield_shader::StarfieldShader;
 use crate::game_resources::{AssetKey,load_textures};
 use crate::texture_hash_map::{TextureHashMap};
+use crate::macroquad_helpers::*;
 
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
@@ -47,7 +49,10 @@ async fn main() {
 
     let mut game_state = GameState::MainMenu;
 
-    let mut enemy_vector: EnemyVector = EnemyVector::new(textures.take(&AssetKey::Explosion));
+    let mut enemy_vector: EnemyVector = EnemyVector::new(
+        textures.take_enemies().to_owned(),
+        textures.take(&AssetKey::Explosion).to_owned()
+    );
     let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
     let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
 
@@ -163,6 +168,10 @@ async fn main() {
     }
 }
 
+// fn init_player_ship() -> PlayerShip<'static> {
+//     PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship))
+// }
+
 fn set_game_over(high_score: &HighScore) {
     let x = get_center_x();
     let y = get_center_y();
@@ -228,12 +237,4 @@ fn put_text_in_center(y : Option<f32>, caption : Caption) {
         *&caption.font_size,
         *&caption.color
     );
-}
-
-fn get_center_x() -> f32 {
-    screen_width() / 2.0   
-}
-
-fn get_center_y() -> f32 {
-    screen_height() / 2.0
 }

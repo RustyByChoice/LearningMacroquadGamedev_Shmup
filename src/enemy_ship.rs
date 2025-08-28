@@ -1,4 +1,5 @@
 use macroquad::prelude::*;
+use macroquad::prelude::animation::AnimatedSprite;
 use crate::shape::Shape;
 use crate::player_ship::PlayerShip;
 use crate::bullet::Bullet;
@@ -8,21 +9,25 @@ pub enum GameEntity<'a> {
     Projectile(Bullet),
 }
 
-pub struct EnemySquare {
+pub struct EnemyShip {
     pub shape: Shape,
+    pub texture: Texture2D,
+    pub sprite: AnimatedSprite,
 }
 
-impl EnemySquare {
-    pub fn new(size : f32, color : Color) -> EnemySquare {
-        return EnemySquare {
+impl EnemyShip {
+    pub fn new(size : f32, texture : Texture2D, sprite: AnimatedSprite) -> EnemyShip {
+        return EnemyShip {
             shape: Shape {
                size,
                speed: rand::gen_range(50.0, 150.0),
                x: rand::gen_range(size / 2.0, screen_width() - size / 2.0),
                y: -size,
-               color: color,
+               color: WHITE,
                collided: false,
             },
+            texture: texture,
+            sprite: sprite
         };
     }
 
@@ -47,12 +52,24 @@ impl EnemySquare {
     }
 
     pub fn draw(&self) {
-        draw_rectangle(
+        let enemy_frame = &self.sprite.frame();
+
+        draw_texture_ex(
+            &self.texture,
             self.shape.x - self.shape.size / 2.0,
             self.shape.y - self.shape.size / 2.0,
-            self.shape.size,
-            self.shape.size,
             self.shape.color,
+            DrawTextureParams {
+                dest_size: Some(vec2(self.shape.size, self.shape.size)),
+                source: Some(enemy_frame.source_rect),
+                ..Default::default()
+            },
         );
+
+        // draw_rectangle(
+        //     self.shape.size,
+        //     self.shape.size,
+        //     self.shape.color,
+        // );
     }
 }

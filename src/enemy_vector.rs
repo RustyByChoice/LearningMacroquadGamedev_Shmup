@@ -1,30 +1,54 @@
-use macroquad::prelude::*;
+use std::collections::HashMap;
+
 use crate::bullet_vector::BulletVector;
 use crate::PlayerShip;
-use crate::enemy_square::{GameEntity,EnemySquare};
+use crate::enemy_ship::{GameEntity,EnemyShip};
+use crate::game_resources::AssetKey;
+// use crate::texture_hash_map::{TextureHashMap};
+
+use macroquad::prelude::*;
+use macroquad::prelude::animation::Animation;
+use macroquad::prelude::animation::AnimatedSprite;
 use macroquad_particles::{self as particles, AtlasConfig, Emitter, EmitterConfig};
 
-pub struct EnemyVector<'a> {
-    enemies: Vec<EnemySquare>,
+pub struct EnemyVector {
+    enemies: Vec<EnemyShip>,
     explosions: Vec<(Emitter, Vec2)>,
-    explosion_texture: &'a Texture2D,
+    enemy_textures: HashMap<AssetKey, Texture2D>,
+    explosion_texture: Texture2D,
 }
 
-impl EnemyVector<'_> {
-    const ENEMY_COLORS : [Color; 4] = [GRAY, BEIGE, PINK, RED];
-
-    pub fn new(texture_explosion: &Texture2D) -> EnemyVector {
-        let enemies = vec![];
-        let explosions = vec![];
-
-        return EnemyVector { enemies, explosions, explosion_texture: texture_explosion }
+impl EnemyVector {
+    pub fn new(textures: HashMap<AssetKey, Texture2D>, explosion_texture: Texture2D) -> EnemyVector {
+        EnemyVector { 
+            enemies: vec![], 
+            explosions: vec![], 
+            enemy_textures: textures, 
+            explosion_texture: explosion_texture
+        }
     }
 
     pub fn spawn_enemy(&mut self) {
-        let size = rand::gen_range(16.0, 64.0);
-        let color = rand::gen_range(0, Self::ENEMY_COLORS.len());
+        // let sizes = vec!(AssetKey::EnemySmall, AssetKey::EnemyMedium, AssetKey::EnemyBig);
+        // let size_texture = rand::gen_range(0, 2);
+        // let random_size = &sizes[size_texture];
+        let picked_size = self.enemy_textures[&AssetKey::EnemySmall].clone();
 
-        self.enemies.push(EnemySquare::new(size, Self::ENEMY_COLORS[color]));
+        // let size = rand::gen_range(16.0, 64.0);
+
+        let enemy_sprite_small : AnimatedSprite = AnimatedSprite::new(
+            17,
+            16,
+            &[Animation {
+                name: "enemy_small".to_string(),
+                row: 0,
+                frames: 2,
+                fps: 12,
+            }],
+            true
+        );
+
+        self.enemies.push(EnemyShip::new(17.0, picked_size, enemy_sprite_small));
     }
 
     pub fn hide_enemies(&mut self) {
@@ -36,6 +60,7 @@ impl EnemyVector<'_> {
     pub fn move_enemies(&mut self, delta_time :f32) {
         for enemy in &mut self.enemies {
             enemy.shape.y += enemy.shape.speed * delta_time;
+            enemy.sprite.update();
         }
     }
 
