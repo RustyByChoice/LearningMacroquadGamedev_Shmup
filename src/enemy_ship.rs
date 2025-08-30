@@ -65,11 +65,5 @@ impl EnemyShip {
                 ..Default::default()
             },
         );
-
-        // draw_rectangle(
-        //     self.shape.size,
-        //     self.shape.size,
-        //     self.shape.color,
-        // );
     }
 }
