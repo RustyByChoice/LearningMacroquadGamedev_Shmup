@@ -7,7 +7,6 @@ mod player_ship;
 mod high_score;
 mod caption;
 mod starfield_shader;
-mod game_resources;
 mod macroquad_helpers;
 mod resources;
 
