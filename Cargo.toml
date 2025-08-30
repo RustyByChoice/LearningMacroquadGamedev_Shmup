@@ -4,10 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-macroquad = "0.4.14"
+macroquad = { version = "0.4.14", features = ["audio"] }
 macroquad-particles = "0.2.2"
-strum = "0.26"
-strum_macros = "0.26"
 
 [profile.dev.package.'*']
 opt-level = 3
