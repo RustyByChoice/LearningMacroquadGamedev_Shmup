@@ -8,10 +8,12 @@ mod high_score;
 mod caption;
 mod starfield_shader;
 mod game_resources;
-mod texture_hash_map;
 mod macroquad_helpers;
+mod resources;
 
 use macroquad::prelude::*;
+use macroquad::ui::{hash, root_ui}; 
+use macroquad::audio::{play_sound, play_sound_once, stop_sound, PlaySoundParams};
 
 use crate::bullet_vector::BulletVector;
 use crate::player_ship::PlayerShip;
@@ -19,9 +21,8 @@ use crate::enemy_vector::EnemyVector;
 use crate::high_score::HighScore;
 use crate::caption::Caption;
 use crate::starfield_shader::StarfieldShader;
-use crate::game_resources::{AssetKey,load_textures};
-use crate::texture_hash_map::{TextureHashMap};
 use crate::macroquad_helpers::*;
+use crate::resources::Resources;
 
 const MOVEMENT_SPEED: f32 = 200.0;
 const SHOT_FREQUENCY: f64 = 0.25;
@@ -34,13 +35,14 @@ enum GameState {
 }
 
 #[macroquad::main("SHMUP'EM UP!")]
-async fn main() {
+async fn main() -> Result<(), macroquad::Error> {
     rand::srand(miniquad::date::now() as u64);
 
     set_pc_assets_folder("assets");
-    let textures = load_textures().await;
-    // ensure that draw_texture calls will use atlas and not separate textures
-    build_textures_atlas();
+    let resources = Resources::new().await?;
+
+    root_ui().push_skin(&resources.ui_skin);
+    let window_size = vec2(370.0, 320.0);
 
     let mut starfield_shader : StarfieldShader = StarfieldShader::new(
         include_str!("shaders/starfield-shader.glsl"),
@@ -50,14 +52,15 @@ async fn main() {
     let mut game_state = GameState::MainMenu;
 
     let mut enemy_vector: EnemyVector = EnemyVector::new(
-        textures.take_enemies().to_owned(),
-        textures.take(&AssetKey::Explosion).to_owned()
+        resources.enemy_small_texture,
+        resources.enemy_medium_texture,
+        resources.enemy_big_texture,
+        resources.explosion_texture
     );
-    let mut bullet_vector: BulletVector = BulletVector::new(textures.take(&AssetKey::LaserBolts)); 
-    let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
+    let mut bullet_vector: BulletVector = BulletVector::new(&resources.bullet_texture); 
+    let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, &resources.ship_texture);
 
     let mut high_score = HighScore::new();
-
  
     loop {
         clear_background(BLACK);
@@ -66,30 +69,53 @@ async fn main() {
 
         match game_state {
             GameState::MainMenu => {
-                if is_key_pressed(KeyCode::Escape) {
-                    std::process::exit(0);
-                }
-                if is_key_pressed(KeyCode::Space) {
-                    enemy_vector.clear();
-                    bullet_vector.clear();
-                    high_score.clear();
-                    player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship));
-                    game_state = GameState::Playing;
-                }
-
-                let title = Caption::new(
-                    "SHMUP'EM UP!".to_string(),
-                    None,
-                    Some(100.0),
-                    None
+                root_ui().window(
+                    hash!(),
+                    vec2(
+                        get_center_x() - window_size.x / 2.0,
+                        get_center_y() - window_size.x / 2.0,
+                    ),
+                    window_size,
+                    |ui| {
+                        ui.label(vec2(80.0, -34.0), "Main Menu");
+                        if ui.button(vec2(65.0, 25.0), "Play") {
+                            enemy_vector.clear();
+                            bullet_vector.clear();
+                            high_score.clear();
+                            player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, &resources.ship_texture);
+                            game_state = GameState::Playing;
+                        }
+                        if ui.button(vec2(65.0, 125.0), "Quit") {
+                            std::process::exit(0);
+                        }
+                    }
                 );
 
-                put_text_in_center(Some(get_center_y() - title.get_dimensions().height), title);
-                put_text_in_center(None, Caption::default("Press space"));
+                // TODO 1: make the ui navigable by keyboard
+                // let title = Caption::new(
+                //     "SHMUP'EM UP!".to_string(),
+                //     None,
+                //     Some(100.0),
+                //     None
+                // );
+
+                // put_text_in_center(Some(get_center_y() - title.get_dimensions().height), title);
+                // put_text_in_center(None, Caption::default("Press space"));
             }
             GameState::Playing => {
                 // time that passed since the last frame
                 let delta_time = get_frame_time();
+                let play_music = false;
+
+                if play_music {
+                    play_sound(
+                        &resources.theme_music,
+                        PlaySoundParams {
+                            looped: false,
+                            volume: 0.1,
+                        },
+                    );
+                }
 
                 player_ship.set_speed(MOVEMENT_SPEED * delta_time);
 
@@ -119,6 +145,7 @@ async fn main() {
                         bullet_vector.fire(&player_ship.shape.x, &(player_ship.shape.y - 24.0));
                         bullet_vector.last_time_fired = shots_fired;
                     }
+                    play_sound_once(&resources.sound_laser);
                 }
                 if is_key_pressed(KeyCode::Escape) {
                     game_state = GameState::Paused;
@@ -141,6 +168,7 @@ async fn main() {
 
                 if enemy_vector.collides_with_bullets(&mut bullet_vector) {
                     high_score.add();
+                    play_sound_once(&resources.sound_explosion);
                 }
 
                 // DRAW
@@ -153,12 +181,14 @@ async fn main() {
                 if is_key_pressed(KeyCode::Space) {
                     game_state = GameState::Playing;
                 }
+                stop_sound(&resources.theme_music);
                 put_text_in_center(None, Caption::default("Paused"));
             }
             GameState::GameOver => {
                 if is_key_pressed(KeyCode::Space) {
                     game_state = GameState::MainMenu;
                 }
+                stop_sound(&resources.theme_music);
                 set_game_over(&high_score);                
             }
         }
@@ -167,10 +197,6 @@ async fn main() {
         next_frame().await
     }
 }
-
-// fn init_player_ship() -> PlayerShip<'static> {
-//     PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, textures.take(&AssetKey::Ship))
-// }
 
 fn set_game_over(high_score: &HighScore) {
     let x = get_center_x();

@@ -1,10 +1,6 @@
-use std::collections::HashMap;
-
 use crate::bullet_vector::BulletVector;
 use crate::PlayerShip;
 use crate::enemy_ship::{GameEntity,EnemyShip};
-use crate::game_resources::AssetKey;
-// use crate::texture_hash_map::{TextureHashMap};
 
 use macroquad::prelude::*;
 use macroquad::prelude::animation::Animation;
@@ -14,25 +10,35 @@ use macroquad_particles::{self as particles, AtlasConfig, Emitter, EmitterConfig
 pub struct EnemyVector {
     enemies: Vec<EnemyShip>,
     explosions: Vec<(Emitter, Vec2)>,
-    enemy_textures: HashMap<AssetKey, Texture2D>,
+    small_enemy_texture: Texture2D,
+    medium_enemy_texture: Texture2D,
+    big_enemy_texture: Texture2D,
     explosion_texture: Texture2D,
 }
 
 impl EnemyVector {
-    pub fn new(textures: HashMap<AssetKey, Texture2D>, explosion_texture: Texture2D) -> EnemyVector {
+    pub fn new(
+        small_enemy_texture: Texture2D,
+        medium_enemy_texture: Texture2D,
+        big_enemy_texture: Texture2D, 
+        explosion_texture: Texture2D
+    ) -> EnemyVector {
         EnemyVector { 
             enemies: vec![], 
             explosions: vec![], 
-            enemy_textures: textures, 
+            small_enemy_texture: small_enemy_texture, 
+            medium_enemy_texture: medium_enemy_texture, 
+            big_enemy_texture: big_enemy_texture, 
             explosion_texture: explosion_texture
         }
     }
 
+    // TODO 1: spawn many types of sizes of enemies
     pub fn spawn_enemy(&mut self) {
         // let sizes = vec!(AssetKey::EnemySmall, AssetKey::EnemyMedium, AssetKey::EnemyBig);
         // let size_texture = rand::gen_range(0, 2);
         // let random_size = &sizes[size_texture];
-        let picked_size = self.enemy_textures[&AssetKey::EnemySmall].clone();
+        let picked_size = self.small_enemy_texture.clone();
 
         // let size = rand::gen_range(16.0, 64.0);
 
