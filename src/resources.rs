@@ -1,6 +1,11 @@
 use macroquad::prelude::{FilterMode, Texture2D, build_textures_atlas, load_image, load_file, RectOffset, WHITE, load_texture};
 use macroquad::audio::{Sound, load_sound};
 use macroquad::ui::{Skin, root_ui};
+use macroquad::prelude::coroutines::start_coroutine;
+use macroquad::prelude::*;
+use macroquad::prelude::collections::storage;
+use crate::get_center_x;
+use crate::get_center_y;
 
 pub struct Resources {
     pub ship_texture: Texture2D,
@@ -16,6 +21,31 @@ pub struct Resources {
 }
 
 impl Resources {
+    pub async fn load() -> Result<(), macroquad::Error> {
+        let resources_loading = start_coroutine(async move {
+            let resources = Resources::new().await.unwrap();
+            storage::store(resources);
+        });
+
+        while !resources_loading.is_done() {
+            clear_background(BLACK);
+            let text = format!(
+                "Loading resources {}",
+                ".".repeat(((get_time() * 2.) as usize) % 4)
+            );
+            draw_text(
+                &text,
+                get_center_x() - 160.,
+                get_center_y(),
+                40.,
+                WHITE
+            );
+            next_frame().await;
+        }
+
+        Ok(())
+    }
+
     pub async fn new() -> Result<Resources, macroquad::Error> {
         let ship_texture = Self::load_texture("ship.png").await;
         let bullet_texture = Self::load_texture("laser-bolts.png").await;

@@ -13,6 +13,7 @@ mod resources;
 use macroquad::prelude::*;
 use macroquad::ui::{hash, root_ui}; 
 use macroquad::audio::{play_sound, play_sound_once, stop_sound, PlaySoundParams};
+use macroquad::experimental::collections::storage;
 
 use crate::bullet_vector::BulletVector;
 use crate::player_ship::PlayerShip;
@@ -38,7 +39,8 @@ async fn main() -> Result<(), macroquad::Error> {
     rand::srand(miniquad::date::now() as u64);
 
     set_pc_assets_folder("assets");
-    let resources = Resources::new().await?;
+    Resources::load().await?;
+    let resources = storage::get::<Resources>();
 
     root_ui().push_skin(&resources.ui_skin);
     let window_size = vec2(370.0, 320.0);
@@ -51,10 +53,10 @@ async fn main() -> Result<(), macroquad::Error> {
     let mut game_state = GameState::MainMenu;
 
     let mut enemy_vector: EnemyVector = EnemyVector::new(
-        resources.enemy_small_texture,
-        resources.enemy_medium_texture,
-        resources.enemy_big_texture,
-        resources.explosion_texture
+        resources.enemy_small_texture.clone(),
+        resources.enemy_medium_texture.clone(),
+        resources.enemy_big_texture.clone(),
+        resources.explosion_texture.clone()
     );
     let mut bullet_vector: BulletVector = BulletVector::new(&resources.bullet_texture); 
     let mut player_ship = PlayerShip::new(get_center_x(), get_center_y(), MOVEMENT_SPEED, &resources.ship_texture);
