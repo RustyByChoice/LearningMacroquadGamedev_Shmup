@@ -244,24 +244,24 @@
 ## Attribute Macros
 [ ] main
 ## Functions
-[ ] audio::load_sound
+[x] audio::load_sound
 [ ] audio::load_sound_from_bytes
-[ ] audio::play_sound
-[ ] audio::play_sound_once
+[x] audio::play_sound
+[x] audio::play_sound_once
 [ ] audio::set_sound_volume
-[ ] audio::stop_sound
+[x] audio::stop_sound
 [ ] camera::pop_camera_state
 [ ] camera::push_camera_state
 [ ] camera::set_camera
 [ ] camera::set_default_camera
 [ ] color::hsl_to_rgb
 [ ] color::rgb_to_hsl
-[ ] experimental::collections::storage::get
+[x] experimental::collections::storage::get
 [ ] experimental::collections::storage::get_mut
-[ ] experimental::collections::storage::store
+[x] experimental::collections::storage::store
 [ ] experimental::collections::storage::try_get
 [ ] experimental::collections::storage::try_get_mut
-[ ] experimental::coroutines::start_coroutine
+[x] experimental::coroutines::start_coroutine
 [ ] experimental::coroutines::stop_all_coroutines
 [ ] experimental::coroutines::stop_coroutine
 [ ] experimental::coroutines::tweens::follow_path
